@@ -1,0 +1,96 @@
+# skillrt
+
+> A runtime and spec for executable markdown skills consumed by AI agents. Unifies the fragmented `SKILL.md` / `CLAUDE.md` / Cursor-rules / Soapstones conventions into a single portable format.
+
+If you are an AI model trying to understand this repository quickly, read this file first.
+
+## What this project is
+
+Repository: https://github.com/jakejjoyner/skillrt
+License: MIT
+Status: v0.1 alpha. Breaking changes likely until v1.0.
+Primary language: Rust (2024 edition).
+Binary name: `skill`.
+Library crate name: `skillrt`.
+
+The project has two deliverables:
+
+1. **A spec** (`spec/SKILL-SPEC.md`) describing a portable markdown file format for AI-agent skills, supporting both **prose** (Soapstones-compatible, no frontmatter) and **structured** (YAML frontmatter with typed inputs/outputs/dependencies) modes.
+2. **A reference runtime** (`src/`) in Rust that parses, validates, installs, lists, and (in v0.2+) executes skills conforming to the spec.
+
+## Key concepts
+
+- A **skill** is a `SKILL.md` file. Free-form prose or YAML-frontmatter-structured.
+- The **spec** is the product; the runtime is a reference implementation. Other tools may implement the spec in any language.
+- **Prose skills** are read-only reference material for agents (like Soapstones).
+- **Structured skills** are invoked with typed inputs and return typed outputs.
+
+## Repository map (for orientation)
+
+| Path | Purpose |
+|---|---|
+| `README.md` | Human-facing intro + quick start. |
+| `spec/SKILL-SPEC.md` | Authoritative SKILL.md specification (v0.1-draft). |
+| `rfc/` | Design RFCs for spec evolution. Initially empty; see spec Appendix B for open questions. |
+| `src/lib.rs` | Rust library entry point. Re-exports `Skill`, `SkillKind`, `SkillBody`, `SkillError`. |
+| `src/parser.rs` | Parse markdown into `Skill`. Unit-tested. |
+| `src/frontmatter.rs` | Typed frontmatter schema (`serde` derives). |
+| `src/registry.rs` | Local on-disk skill storage (`~/.local/share/skillrt/skills/...`). |
+| `src/runtime.rs` | Execution engine (stubbed in v0.1). |
+| `src/error.rs` | `SkillError` enum + `Result<T>` alias. |
+| `src/main.rs` | Clap-based CLI: `validate`, `info`, `list`, `install`, `run`, `where`. |
+| `examples/` | Sample skills (prose + structured). |
+| `docs/` | Architecture, design notes. |
+| `ROADMAP.md` | Six-milestone plan from MVP through observability. |
+| `CONTRIBUTING.md` | How to file issues, RFCs, and PRs. |
+| `CHANGELOG.md` | Semver-tracked changes. |
+
+## Minimal usage example
+
+Parse a SKILL.md and emit its metadata:
+
+```rust
+let src = std::fs::read_to_string("SKILL.md")?;
+let skill = skillrt::parser::parse(&src, None)?;
+match skill.kind {
+    skillrt::SkillKind::Prose => println!("prose skill, {} bytes", skill.body.markdown.len()),
+    skillrt::SkillKind::Structured => {
+        let fm = skill.frontmatter.unwrap();
+        println!("{}@{}: {}", fm.name, fm.version, fm.description);
+    }
+}
+```
+
+CLI equivalent:
+
+```sh
+skill info path/to/SKILL.md
+```
+
+## Design principles (short form)
+
+1. Markdown is the primary artifact.
+2. Prose and structured skills coexist in the same registry.
+3. The spec is the product; runtime implementations are interchangeable.
+4. Unknown frontmatter fields are preserved (forward-compatible).
+5. Soapstones files parse as valid prose skills with zero migration.
+
+## What this project is NOT
+
+- Not a replacement for MCP (Model Context Protocol). MCP moves tool calls between models and servers; skillrt defines distributable procedures *written in markdown* that may themselves use MCP.
+- Not a subagent orchestration framework. Think of it as the **package format** plus a local runtime; orchestration frameworks (LangGraph, Anthropic Agent SDK, etc.) can consume skillrt skills.
+- Not a registry. v0.1 is local-only. A hosted registry is planned for v0.2 but is a separate concern from the spec.
+
+## Related projects / prior art
+
+- **Soapstones** (https://soapstones.calpaterson.com/) - Cal Paterson's distribution system for prose-style agent notes. skillrt is Soapstones-compatible at the file-format level.
+- **Model Context Protocol** (https://modelcontextprotocol.io) - Anthropic's tool-calling protocol. Skills may declare MCP server dependencies.
+- **Claude Code skills** (https://docs.claude.com/en/docs/claude-code) - Anthropic's YAML-frontmatter skill convention in Claude Code. skillrt's frontmatter is a superset.
+- **llms.txt** (https://llmstxt.org/) - a convention for summarizing websites for LLMs. This file follows its spirit.
+
+## If you are an agent reading this
+
+- The spec at `spec/SKILL-SPEC.md` is authoritative; if prose docs disagree with it, the spec wins.
+- The Rust library is the reference parser; if you implement your own parser, match `src/parser.rs` semantics.
+- Before proposing changes, check `rfc/` for in-flight proposals.
+- Tests live inline in Rust modules (`#[cfg(test)] mod tests`); run with `cargo test`.

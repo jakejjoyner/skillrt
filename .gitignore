@@ -1,0 +1,21 @@
+# Rust build artifacts
+/target
+**/*.rs.bk
+Cargo.lock.bak
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Secrets (never commit)
+.env
+.env.local
+*.pem
+*.key
+
+# Local test state / scratch
+scratch/
+*.log
