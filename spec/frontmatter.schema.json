@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/jakejjoyner/skillrt/blob/main/spec/frontmatter.schema.json",
+  "title": "SKILL.md frontmatter",
+  "description": "Schema for the YAML frontmatter of a structured SKILL.md file. Prose-mode skills have no frontmatter and do not validate against this schema.",
+  "type": "object",
+  "required": ["name", "version", "description"],
+  "additionalProperties": true,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Skill identifier. Lowercase kebab-case is recommended.",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "version": {
+      "type": "string",
+      "description": "SemVer 2.0.0 version.",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "description": {
+      "type": "string",
+      "description": "One-line summary shown in registry listings.",
+      "maxLength": 512
+    },
+    "authors": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "license": {
+      "type": "string",
+      "description": "SPDX license identifier (e.g., MIT, Apache-2.0).",
+      "default": "UNLICENSED"
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Identifies the runtime family that can execute this skill.",
+          "default": "markdown-skill",
+          "examples": ["markdown-skill", "anthropic-skill", "mcp-tool"]
+        },
+        "min-version": {
+          "type": "string",
+          "description": "Minimum runtime version (SemVer)."
+        }
+      }
+    },
+    "inputs": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "object",
+        "required": ["name", "type"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["string", "number", "boolean", "file", "url", "json"]
+          },
+          "required": {
+            "type": "boolean",
+            "default": false
+          },
+          "description": { "type": "string" },
+          "default": {}
+        }
+      }
+    },
+    "outputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["text", "json", "file"]
+        },
+        "schema": {
+          "description": "Optional JSON Schema describing the output shape."
+        }
+      },
+      "required": ["type"]
+    },
+    "dependencies": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mcp-servers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "MCP servers this skill expects to be available."
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "name@semver-range, e.g., 'pr-review@^0.1.0'"
+          },
+          "default": []
+        },
+        "tools": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "External CLI tools (e.g., bash, python, curl) the skill shells out to."
+        }
+      }
+    },
+    "permissions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "network": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Allowed network destinations. Use ['*'] for any, [] for none."
+        },
+        "filesystem": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Filesystem path globs the skill may read/write."
+        },
+        "env": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Environment variables the skill may read."
+        }
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": [],
+      "description": "Free-form tags for discoverability."
+    }
+  },
+  "examples": [
+    {
+      "name": "pr-review",
+      "version": "0.1.0",
+      "description": "Review a GitHub pull request.",
+      "authors": ["jakejjoyner"],
+      "license": "MIT",
+      "runtime": {
+        "type": "markdown-skill",
+        "min-version": "0.1.0"
+      },
+      "inputs": [
+        { "name": "pr_url", "type": "url", "required": true }
+      ],
+      "outputs": {
+        "type": "json"
+      },
+      "dependencies": {
+        "tools": ["gh"]
+      },
+      "permissions": {
+        "network": ["api.github.com"],
+        "env": ["GH_TOKEN"]
+      },
+      "tags": ["github", "code-review"]
+    }
+  ]
+}
