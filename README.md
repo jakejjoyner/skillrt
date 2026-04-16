@@ -22,7 +22,9 @@ One registry, one runtime, both content types.
 
 ## Status
 
-**v0.1 (alpha).** Parser, validator, and local install/list/info commands work. Execution, hosted registry, and multi-agent observability land in subsequent releases. See [ROADMAP.md](./ROADMAP.md) for the full six-milestone plan.
+**v0.1 shipped.** The spec draft, parser, validator, and local `install`/`list`/`info` commands are live. Install from source today; see the [CHANGELOG](./CHANGELOG.md) for what landed.
+
+**Next up: v0.2 — hosted registry.** Publish and install skills by name from a public registry, with semver resolution and signed releases. See [ROADMAP.md](./ROADMAP.md) for the full six-milestone plan through execution, shared memory, and observability.
 
 Everything is open-source (MIT). Breaking changes are likely until v0.2.
 
