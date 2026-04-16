@@ -2,6 +2,7 @@
 name = "skillrt"
 version = "0.1.0"
 edition = "2024"
+rust-version = "1.85"
 authors = ["Jake Joyner <jakejoyner@users.noreply.github.com>"]
 license = "MIT"
 description = "A runtime and spec for executable markdown skills consumed by AI agents."
@@ -10,6 +11,11 @@ homepage = "https://github.com/jakejjoyner/skillrt"
 readme = "README.md"
 keywords = ["ai", "agent", "markdown", "skill", "llm"]
 categories = ["command-line-utilities", "development-tools"]
+exclude = [
+    ".github/",
+    ".gitignore",
+    "CLAUDE.md",
+]
 
 [[bin]]
 name = "skill"
