@@ -6,18 +6,22 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
-## [0.1.0] - 2026-04-15
+## [0.1.0] - 2026-04-16
 
 ### Added
 
 - Initial public release.
 - Rust crate: `skillrt` library + `skill` binary.
 - `spec/SKILL-SPEC.md` v0.1-draft describing the SKILL.md format with prose and structured modes.
+- `spec/frontmatter.schema.json`: JSON Schema (draft 2020-12) for the structured-mode frontmatter. Usable for editor/IDE validation.
 - CLI commands: `validate`, `info`, `list`, `install`, `run`, `where`.
 - Parser supports both prose (no frontmatter, Soapstones-compatible) and structured (YAML frontmatter) skills.
 - Frontmatter schema: `name`, `version`, `description`, `authors`, `license`, `runtime`, `inputs`, `outputs`, `dependencies`, `permissions`, `tags`. Unknown fields are preserved.
 - Local on-disk registry under platform-standard data directory.
+- Reference skills under `examples/`: `structured-pr-review.md` (structured mode) and `prose-uk-train-times.md` (prose, Soapstones-compatible).
+- `docs/architecture.md` internal architecture reference for contributors.
 - `llms.txt` for model-readable project summary.
+- GitHub Actions CI: `fmt --check`, `clippy -D warnings`, `build`, `test`, and validation of the reference example skills on push and pull request.
 - MIT license.
 
 ### Known limitations
