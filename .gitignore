@@ -19,3 +19,9 @@ Cargo.lock.bak
 # Local test state / scratch
 scratch/
 *.log
+
+# Gas Town / polecat session artifacts (not project files)
+/.runtime/
+/.beads/
+/.claude/
+/CLAUDE.md
