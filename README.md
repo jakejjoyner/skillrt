@@ -3,7 +3,7 @@
 > **A runtime and spec for executable markdown skills consumed by AI agents.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
-[![Status: alpha](https://img.shields.io/badge/status-alpha-orange.svg)](#status)
+[![Status: v0.1](https://img.shields.io/badge/status-v0.1-green.svg)](#status)
 
 ---
 
@@ -29,16 +29,13 @@ Everything is open-source (MIT). Breaking changes are likely until v0.2.
 ## Install
 
 ```sh
-# From source (Rust 1.75+ required)
-git clone https://github.com/jakejjoyner/skillrt
-cd skillrt
-cargo install --path .
+cargo install skillrt
 
 # verify
 skill --version
 ```
 
-Pre-built binaries and a Homebrew tap land in v0.2.
+Rust 1.75+ required. To build from a checkout, see [CONTRIBUTING.md](./CONTRIBUTING.md#development-setup).
 
 ## Quick start
 
@@ -88,7 +85,7 @@ skill list
 
 ### 3. An AI agent consumes it
 
-In v0.1 the runtime prints the skill body; your agent (Claude Code, Cursor, etc.) consumes it as instruction context. In v0.2 `skill run pr-review --inputs '{"pr_url":"..."}'` will invoke it end-to-end with permission enforcement and structured output.
+In v0.1 the runtime prints the skill body; your agent (Claude Code, Cursor, etc.) consumes it as instruction context. In v0.4 `skill run pr-review --inputs '{"pr_url":"..."}'` will invoke it end-to-end with permission enforcement and structured output (see [ROADMAP.md](./ROADMAP.md)).
 
 ### Prose-mode (Soapstones-compatible)
 
@@ -107,7 +104,7 @@ Same `skill validate`, `skill install`, `skill list` commands apply.
 
 ## Why skillrt exists
 
-Read the [spec rationale](./spec/SKILL-SPEC.md#rationale) and [llms.txt](./llms.txt) (machine-friendly project summary for AI models trying to understand the repo).
+Read the [spec rationale](./spec/SKILL-SPEC.md#2-rationale) and [llms.txt](./llms.txt) (machine-friendly project summary for AI models trying to understand the repo).
 
 ## Design principles
 
@@ -124,7 +121,6 @@ skillrt/
 ├── src/                  # Rust crate: parser, runtime, registry, CLI
 ├── spec/                 # Authoritative SKILL.md specification
 │   └── SKILL-SPEC.md
-├── rfc/                  # Design RFCs (versioned proposals)
 ├── examples/             # Reference skills (prose + structured)
 ├── docs/                 # Architecture, internals
 ├── llms.txt              # Machine-friendly summary for AI models
