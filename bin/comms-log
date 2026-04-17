@@ -1,0 +1,109 @@
+#!/usr/bin/env python3
+"""comms-log — shell/hook wrapper for the per-silo comms log writer.
+
+Usage:
+    comms-log <event> [--silo NAME] [--kv KEY=VALUE ...] [--path PATH]
+              [--stdout] [--verify]
+
+Examples:
+    comms-log wheel.consulted
+    comms-log sling --kv task_id=sk-79h --kv direction=local
+    comms-log fling --silo mayor --kv task_id=t3 --kv target=pasha/inbox \
+                    --kv tier=autonomous --kv task_class=digest_gen \
+                    --kv direction=out
+    comms-log --verify
+
+Silo defaults to $GT_SILO, else to the basename of $GT_ROLE (which
+`gt prime` sets to e.g. "skillrt/polecats/onyx" → "onyx"), else "unknown".
+
+Exits non-zero on schema errors, unknown --kv keys, or (with --verify)
+on hash-chain corruption.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import sys
+from pathlib import Path
+
+# Make the sibling `comms` package importable regardless of cwd.
+_HERE = Path(__file__).resolve().parent
+_REPO = _HERE.parent
+if str(_REPO) not in sys.path:
+    sys.path.insert(0, str(_REPO))
+
+from comms import DEFAULT_LOG_PATH, log_event, verify_chain  # noqa: E402
+
+
+def _default_silo() -> str:
+    silo = os.environ.get("GT_SILO")
+    if silo:
+        return silo
+    role = os.environ.get("GT_ROLE", "")
+    if role:
+        return role.rstrip("/").split("/")[-1] or "unknown"
+    return "unknown"
+
+
+def _parse_kv(items: list[str]) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for item in items:
+        if "=" not in item:
+            raise SystemExit(f"comms-log: --kv expects KEY=VALUE, got {item!r}")
+        key, value = item.split("=", 1)
+        key = key.strip()
+        if not key:
+            raise SystemExit(f"comms-log: empty key in --kv {item!r}")
+        out[key] = value
+    return out
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="comms-log",
+        description="Append a hash-chained event to the silo's comms log.",
+    )
+    parser.add_argument("event", nargs="?", help="event name, e.g. wheel.consulted")
+    parser.add_argument("--silo", default=None, help="silo name (defaults to $GT_SILO / $GT_ROLE)")
+    parser.add_argument(
+        "--kv",
+        action="append",
+        default=[],
+        metavar="KEY=VALUE",
+        help="optional schema field (repeatable): task_id, task_class, tier, "
+             "direction, target, border_result",
+    )
+    parser.add_argument("--path", default=None, help=f"log path (default: {DEFAULT_LOG_PATH})")
+    parser.add_argument("--stdout", action="store_true",
+                        help="also echo the written entry as JSON to stdout")
+    parser.add_argument("--verify", action="store_true",
+                        help="verify hash-chain integrity of the log and exit")
+    args = parser.parse_args(argv)
+
+    path = Path(args.path) if args.path else DEFAULT_LOG_PATH
+
+    if args.verify:
+        ok = verify_chain(path)
+        print(f"{'ok' if ok else 'corrupt'}: {path}")
+        return 0 if ok else 2
+
+    if not args.event:
+        parser.error("event is required (or pass --verify)")
+
+    silo = args.silo or _default_silo()
+    try:
+        fields = _parse_kv(args.kv)
+        entry = log_event(silo, args.event, path=path, **fields)
+    except ValueError as e:
+        print(f"comms-log: {e}", file=sys.stderr)
+        return 1
+
+    if args.stdout:
+        print(json.dumps(entry, sort_keys=True, separators=(",", ":")))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
