@@ -123,6 +123,7 @@ skillrt/
 ├── src/                  # Rust crate: parser, runtime, registry, CLI
 ├── spec/                 # Authoritative SKILL.md specification
 │   └── SKILL-SPEC.md
+├── rfc/                  # Design RFCs (versioned proposals)
 ├── examples/             # Reference skills (prose + structured)
 ├── docs/                 # Architecture, internals
 ├── llms.txt              # Machine-friendly summary for AI models
