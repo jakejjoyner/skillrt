@@ -20,6 +20,10 @@ Cargo.lock.bak
 scratch/
 *.log
 
+# Python bytecode (comms/ is stdlib-only Python)
+__pycache__/
+*.pyc
+
 # Gas Town / polecat session artifacts (not project files)
 /.runtime/
 /.beads/
